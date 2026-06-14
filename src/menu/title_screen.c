@@ -14,6 +14,9 @@
 #include "seq_ids.h"
 #include "sm64.h"
 #include "title_screen.h"
+#include "seq_ids.h"
+
+u16 seqArgs;
 
 /**
  * @file title_screen.c
@@ -25,8 +28,8 @@
 #define STUB_LEVEL(textname, _1, _2, _3, _4, _5, _6, _7, _8) textname,
 #define DEFINE_LEVEL(textname, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10) textname,
 
-static char sLevelSelectStageNames[64][16] = {
-#include "levels/level_defines.h"
+static char sLevelSelectStageNames[][32] = {
+#include "menu/seq_name.h"
 };
 #undef STUB_LEVEL
 #undef DEFINE_LEVEL
@@ -64,39 +67,44 @@ s16 intro_level_select(void) {
     }
 
     // if the stage was changed, play the sound for changing a stage.
-    if (stageChanged) {
+/*    if (stageChanged) {
         play_sound(SOUND_GENERAL_LEVEL_SELECT_CHANGE, gGlobalSoundSource);
+    } 
+*/
+
+    if (gCurrLevelNum > 34) {
+        gCurrLevelNum = 1; // exceeded max. set to min.
     }
 
-    if (gCurrLevelNum > LEVEL_MAX) {
-        gCurrLevelNum = LEVEL_MIN; // exceeded max. set to min.
-    }
-
-    if (gCurrLevelNum < LEVEL_MIN) {
-        gCurrLevelNum = LEVEL_MAX; // exceeded min. set to max.
+    if (gCurrLevelNum < 1) {
+        gCurrLevelNum = 34; // exceeded min. set to max.
     }
 
     // Use file 4 and last act as a test
     gCurrSaveFileNum = 4;
     gCurrActNum = 6;
 
-    print_text_centered(160, 80, "SELECT STAGE");
+    print_text_centered(160, 80, "SOUND TEST");
     print_text_centered(160, 30, "PRESS START BUTTON");
-    print_text_fmt_int(40, 60, "%2d", gCurrLevelNum);
-    print_text(80, 60, sLevelSelectStageNames[gCurrLevelNum - 1]); // print stage name
+    print_text_fmt_int(40, 80, "%2d", gCurrLevelNum);
+    print_text(10, 60, sLevelSelectStageNames[gCurrLevelNum - 1]); // print stage name
 
 #define QUIT_LEVEL_SELECT_COMBO (Z_TRIG | START_BUTTON | L_CBUTTONS | R_CBUTTONS)
 
-    // start being pressed signals the stage to be started. that is, unless...
-    if (gPlayer1Controller->buttonPressed & START_BUTTON) {
-        // ... the level select quit combo is being pressed, which uses START. If this
-        // is the case, quit the menu instead.
-        if (gPlayer1Controller->buttonDown == QUIT_LEVEL_SELECT_COMBO) {
+    if (gPlayer1Controller->buttonPressed & L_TRIG) {
             gDebugLevelSelect = FALSE;
             return -1;
-        }
-        play_sound(SOUND_MENU_STAR_SOUND, gGlobalSoundSource);
-        return gCurrLevelNum;
+    }
+
+    if (gPlayer1Controller->buttonPressed & Z_TRIG) {
+            return -1;
+    }
+
+    // start being pressed signals the stage to be started. that is, unless...
+    if (gPlayer1Controller->buttonPressed & START_BUTTON) {
+        stop_background_music(gCurrLevelNum);
+        play_music(SEQ_PLAYER_LEVEL, gCurrLevelNum, 0);
+//        return gCurrLevelNum;
     }
     return 0;
 }

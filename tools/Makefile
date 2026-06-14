@@ -11,11 +11,7 @@ ALL_PROGRAMS := armips textconv patch_elf_32bit aifc_decode aiff_extract_codeboo
 LIBAUDIOFILE := audiofile/libaudiofile.a
 
 # Only build armips from tools if it is not found on the system
-ifeq ($(call find-command,armips),)
-  BUILD_PROGRAMS := $(ALL_PROGRAMS)
-else
-  BUILD_PROGRAMS := $(filter-out armips,$(ALL_PROGRAMS))
-endif
+BUILD_PROGRAMS := $(filter-out armips,$(ALL_PROGRAMS))
 
 default: all
 
@@ -65,7 +61,7 @@ slienc_CFLAGS :=
 
 all-except-recomp: $(LIBAUDIOFILE) $(BUILD_PROGRAMS)
 
-all: all-except-recomp ido-static-recomp
+all: all-except-recomp
 
 clean:
 	$(RM) $(ALL_PROGRAMS)
