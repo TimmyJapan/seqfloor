@@ -20,16 +20,7 @@ void play_flip_sounds(struct MarioState *m, s16 frame1, s16 frame2, s16 frame3) 
     }
 }
 
-void play_far_fall_sound(struct MarioState *m) {
-    u32 action = m->action;
-    if (!(action & ACT_FLAG_INVULNERABLE) && action != ACT_TWIRLING && action != ACT_FLYING
-        && !(m->flags & MARIO_UNKNOWN_18)) {
-        if (m->peakHeight - m->pos[1] > 5150.0f) {
-            play_sound(SOUND_MARIO_WAAAOOOW, m->marioObj->header.gfx.cameraToObject);
-            m->flags |= MARIO_UNKNOWN_18;
-        }
-    }
-}
+// no play_far_fall_sound, the scream that happens in Game Zero at 6:51 is likely from another TV after Mario died in a different stage
 
 s32 lava_boost_on_wall(struct MarioState *m) {
     m->faceAngle[1] = atan2s(m->wall->normal.z, m->wall->normal.x);
@@ -58,13 +49,18 @@ s32 check_fall_damage(struct MarioState *m, u32 hardFallAction) {
 #pragma GCC diagnostic ignored "-Wtype-limits"
 #endif
 
-    damageHeight = 1000.0f;
+    //! Never true
+    if (m->actionState == ACT_GROUND_POUND) {
+        damageHeight = 600.0f;
+    } else {
+        damageHeight = 1000.0f;
+    }
 
 #pragma GCC diagnostic pop
 
     if (m->action != ACT_TWIRLING && m->floor->type != SURFACE_BURNING) {
         if (m->vel[1] < -55.0f) {
-            if (fallHeight > 2000.0f) {
+            if (fallHeight > 3000.0f) {
                 m->hurtCounter += 16;
                 return drop_and_set_mario_action(m, hardFallAction, 4);
             } else if (fallHeight > damageHeight && !mario_floor_is_slippery(m)) {
@@ -519,29 +515,34 @@ s32 act_twirling(struct MarioState *m) {
         yawVelTarget = 0x1800;
     }
 
-    m->angleVel[1] = approach_s32(m->angleVel[1], yawVelTarget, 350, 512);
-    m->twirlYaw += m->angleVel[1];
-
     switch (m->actionArg) {
         case 0:
+            m->angleVel[1] = approach_s32(m->angleVel[1], 0x1040, 0x340, 0x200);            
             set_mario_animation(m, MARIO_ANIM_DOUBLE_JUMP_RISE);
             play_mario_sound(m, SOUND_ACTION_TERRAIN_JUMP, SOUND_MARIO_YAHOO);
+            
             if (m->vel[1] < 0.0f) {
                 m->actionArg = 1;
+                m->angleVel[1] += 0x460;
             }
             break;
 
         case 1:
+            m->angleVel[1] = approach_s32(m->angleVel[1], yawVelTarget, 0x200, 0x200);
             set_mario_animation(m, MARIO_ANIM_START_TWIRL);
+            
             if (is_anim_past_end(m)) {
                 m->actionArg = 2;
             }
             break;
 
         case 2:
+            m->angleVel[1] = approach_s32(m->angleVel[1], yawVelTarget, 0x200, 0x200);    
             set_mario_animation(m, MARIO_ANIM_TWIRL);
             break;
     }
+
+    m->twirlYaw += m->angleVel[1];
 
     if (startTwirlYaw > m->twirlYaw) {
         play_sound(SOUND_ACTION_TWIRL, m->marioObj->header.gfx.cameraToObject);
@@ -1469,8 +1470,6 @@ s32 mario_execute_airborne_action(struct MarioState *m) {
     if (check_common_airborne_cancels(m)) {
         return TRUE;
     }
-
-    play_far_fall_sound(m);
 
     /* clang-format off */
     switch (m->action) {

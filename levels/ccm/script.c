@@ -19,7 +19,7 @@
 static const LevelScript script_func_local_1[] = {
     OBJECT(/*model*/ MODEL_PENGUIN,          /*pos*/  7346, -4096,  6186, /*angle*/ 0,   0, 0, /*bhvParam*/ 0x00020000, /*bhv*/ bhvSmallPenguin),
     OBJECT(/*model*/ MODEL_PENGUIN,          /*pos*/  7488, -4096,  6083, /*angle*/ 0,   0, 0, /*bhvParam*/ 0x00020000, /*bhv*/ bhvSmallPenguin),
-    OBJECT(/*model*/ MODEL_PENGUIN,          /*pos*/  7863, -4096, -7915, /*angle*/ 0,  90, 0, /*bhvParam*/ 0x00020000, /*bhv*/ bhvSmallPenguin),
+    OBJECT(/*model*/ MODEL_PENGUIN,          /*pos*/  3416, -2778, 3420, /*angle*/ 0,  90, 0, /*bhvParam*/ 0x00020000, /*bhv*/ bhvSmallPenguin),
     OBJECT(/*model*/ MODEL_PENGUIN,          /*pos*/  2147,  4096, -1261, /*angle*/ 0, 180, 0, /*bhvParam*/ 0x00000000, /*bhv*/ bhvSmallPenguin),
     RETURN(),
 };
@@ -89,7 +89,7 @@ const LevelScript level_ccm_entry[] = {
         JUMP_LINK(script_func_local_1),
         JUMP_LINK(script_func_local_2),
         TERRAIN(/*terrainData*/ snow_slider_collision),
-        SHOW_DIALOG(/*index*/ 0x00, DIALOG_048),
+        SHOW_DIALOG(/*index*/ 0x00, MESS_SNOWSLIDE),
         SET_BACKGROUND_MUSIC(/*settingsPreset*/ 0x0000, /*seq*/ SEQ_LEVEL_GRASS),
         TERRAIN_TYPE(/*terrainType*/ TERRAIN_SNOW),
     END_AREA(),

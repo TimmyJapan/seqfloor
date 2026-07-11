@@ -144,7 +144,7 @@ void bully_spawn_coin(void) {
     struct Object *coin = spawn_object(o, MODEL_YELLOW_COIN, bhvMovingYellowCoin);
     coin->oForwardVel = 10.0f;
     coin->oVelY = 100.0f;
-    coin->oPosY = o->oPosY + 310.0f;
+    coin->oPosY = o->oPosY;
     coin->oMoveAngleYaw = (f32) (o->oBullyMarioCollisionAngle + 0x8000) + random_float() * 1024.0f;
 }
 
@@ -154,11 +154,6 @@ void bully_act_level_death(void) {
             if (o->oBullySubtype == BULLY_STYPE_MINION)
                 o->parentObj->oBullyKBTimerAndMinionKOCounter++;
             bully_spawn_coin();
-        } else {
-            spawn_mist_particles();
-
-            spawn_default_star(0, 950.0f, -6800.0f);
-            spawn_object_abs_with_rot(o, 0, MODEL_NONE, bhvLLLTumblingBridge, 0, 154, -5631, 0, 0, 0);
         }
     }
 }
@@ -202,7 +197,7 @@ void bhv_bully_loop(void) {
             break;
 
         case BULLY_ACT_LAVA_DEATH:
-            cur_obj_scale(0.0f);
+            cur_obj_scale((f32) 1.0 - o->oTimer / 25.0);
             bully_act_level_death();
             break;
 
@@ -241,7 +236,7 @@ void bhv_big_bully_with_minions_init(void) {
 void big_bully_spawn_star(void) {
     spawn_mist_particles();
 
-    spawn_default_star(3850.0f, 600.0f, -5600.0f);
+    spawn_default_star(3850.0f, 323.0f, -5600.0f);
 }
 
 void bhv_big_bully_with_minions_loop(void) {

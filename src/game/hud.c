@@ -83,7 +83,7 @@ void render_hud_small_tex_lut(s32 x, s32 y, u8 *texture) {
 void render_power_meter_health_segment(s16 numHealthWedges) {
     u8 *(*healthLUT)[];
 
-    healthLUT = segmented_to_virtual(power_meter_health_segments_lut);
+    healthLUT = segmented_to_virtual(MeterDataPtr);
 
     gDPPipeSync(gDisplayListHead++);
     g_Tani_LoadTextureImage2(gDisplayListHead++, (*healthLUT)[numHealthWedges * 2], G_IM_FMT_RGBA,
@@ -99,29 +99,22 @@ void render_power_meter_health_segment(s16 numHealthWedges) {
  * That includes the "POWER" base and the colored health segment textures.
  */
 void render_dl_power_meter(s16 numHealthWedges) {
-    Mtx *translateMtx;
-    Mtx *scaleMtx;
+    Mtx *mtx = alloc_display_list(sizeof(Mtx));
 
-    translateMtx = alloc_display_list(sizeof(Mtx));
-    scaleMtx = alloc_display_list(sizeof(Mtx));
-
-    if (translateMtx == NULL || scaleMtx == NULL) {
+    if (mtx == NULL) {
         rmonpf(("AllocDynamic error in message!!\n"));
         return;
     }
 
-    guTranslate(translateMtx, (f32) sPowerMeterHUD.x, (f32) sPowerMeterHUD.y, 0);
-    guScale(scaleMtx, 1.0f, 1.0f, 1.0f);
+    guTranslate(mtx, (f32) sPowerMeterHUD.x, (f32) sPowerMeterHUD.y, 0);
 
-    gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(translateMtx++),
+    gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(mtx++),
               G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gSPDisplayList(gDisplayListHead++, &RCP_damegemeter_on);
 
-    gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(scaleMtx++),
-              G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_NOPUSH);
-
-    gSPDisplayList(gDisplayListHead++, &dl_power_meter_base);
-
+    gSPDisplayList(gDisplayListHead++, &RCP_damegemeter_txt);
     render_power_meter_health_segment(numHealthWedges);
+    gSPDisplayList(gDisplayListHead++, &RCP_damegemeter_off);
 
     gSPPopMatrix(gDisplayListHead++, G_MTX_MODELVIEW);
 }
